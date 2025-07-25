@@ -73,7 +73,7 @@ Route::group([
         Route::post('/{database}/rotate-password', [Client\Servers\DatabaseController::class, 'rotatePassword']);
         Route::delete('/{database}', [Client\Servers\DatabaseController::class, 'delete']);
     });
-
+    
     Route::group(['prefix' => '/files'], function () {
         Route::get('/list', [Client\Servers\FileController::class, 'directory']);
         Route::get('/contents', [Client\Servers\FileController::class, 'contents']);
@@ -138,5 +138,13 @@ Route::group([
         Route::post('/rename', [Client\Servers\SettingsController::class, 'rename']);
         Route::post('/reinstall', [Client\Servers\SettingsController::class, 'reinstall']);
         Route::put('/docker-image', [Client\Servers\SettingsController::class, 'dockerImage']);
+    });
+
+
+    //Free addons
+    Route::group(['prefix' => '/addons'], function () {
+       Route::group(['prefix' => '/minecraft'], function () {
+           Route::get('/versions', [Client\Servers\Addons\Minecraft\MinecraftVersionsController::class, 'index']);
+       });
     });
 });
