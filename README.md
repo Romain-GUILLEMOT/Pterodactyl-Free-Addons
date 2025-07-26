@@ -17,40 +17,74 @@ The module exposes a new client API route to fetch available Minecraft versions.
 | Parameter | Type | Default | Description |
 | :-------- | :--- | :------ | :---------- |
 | `page` | `int` | `1` | The result page to retrieve. |
-| `limit` | `int` | `20` | The number of results per page. Max 50. |
-| `search` | `string` | `null` | Filters versions by a search string (e.g., "1.18", "Paper"). |
-| `type` | `string` | `null` | Filters by server type (e.g., "vanilla", "paper", "forge", "fabric"). |
-| `stability` | `string` | `null` | Filters by version stability ("release", "snapshot", "beta", "alpha"). |
-| `build` | `int` | `null` | Filters for a specific build number (e.g., Paper build 200). |
-| `sort` | `string` | `"version"` | The field to sort by ("version", "release\_date", "type"). |
-| `order` | `string` | `"desc"` | The sort order for versions (desc for descending, asc for ascending - default). |
+| `limit` | `int` | `100` | The number of results per page. |
+| `type` | `string` | `"vanilla"` | Filters by server type (e.g., "vanilla", "paper", "forge", "fabric", "papermc", "folia", "velocity", "quilt", "spigot", "mohist", "youer", "neoforge", "bungeecord", "purpur", "magmaneo"). |
+| `sort` | `string` | `"asc"` | The sort order for versions (`asc` for ascending, `desc` for descending). *Note: This parameter controls the overall order of the results, not sorting by specific fields.* |
+| `minecraft_version` | `string` | `null` | Required for `forge`, `neoforge`, `fabric`, `mohist`, `youer`, `magmaneo` to get specific builds/loaders for a Minecraft version. |
 
-#### **Example Response (Case: `type=paper` with `limit=3`)**
+#### **Example Response (Case: `type=papermc` with `limit=3`)**
 
 ```json
-[
-  {
-    "version": "1.20.4",
-    "type": "paper",
-    "stability": "release",
-    "build": 412,
-    "release_date": "2024-07-25T10:00:00Z",
-    "download_url": "[https://papermc.io/api/v2/projects/paper/versions/1.20.4/builds/412/downloads/paper-1.20.4-412.jar](https://papermc.io/api/v2/projects/paper/versions/1.20.4/builds/412/downloads/paper-1.20.4-412.jar)"
-  },
-  {
-    "version": "1.20.4",
-    "type": "paper",
-    "stability": "release",
-    "build": 411,
-    "release_date": "2024-07-24T18:30:00Z",
-    "download_url": "[https://papermc.io/api/v2/projects/paper/versions/1.20.4/builds/411/downloads/paper-1.20.4-411.jar](https://papermc.io/api/v2/projects/paper/versions/1.20.4/builds/411/downloads/paper-1.20.4-411.jar)"
-  },
-  {
-    "version": "1.20.4",
-    "type": "paper",
-    "stability": "release",
-    "build": 410,
-    "release_date": "2024-07-24T09:15:00Z",
-    "download_url": "[https://papermc.io/api/v2/projects/paper/versions/1.20.4/builds/410/downloads/paper-1.20.4-410.jar](https://papermc.io/api/v2/projects/paper/versions/1.20.4/builds/410/downloads/paper-1.20.4-410.jar)"
+{
+  "success": true,
+  "data": [
+    {
+      "id": "1.20.4"
+    },
+    {
+      "id": "1.20.3"
+    },
+    {
+      "id": "1.20.2"
+    }
+  ],
+  "versionRequired": false,
+  "meta": {
+    "total": 123, // Example: Total number of available PaperMC versions
+    "limit": 3,
+    "page": 1
   }
-]
+}
+```
+
+#### **Example Response (Case: `type=fabric` with `minecraft_version=1.20.4`)**
+
+```json
+{
+  "success": true,
+  "data": {
+    "game": [
+      "1.20.4"
+    ],
+    "loader": [
+      "0.15.11",
+      "0.15.10",
+      "0.15.9"
+    ]
+  },
+  "versionRequired": true,
+  "meta": {
+    "total": 1, // Total refers to the number of game versions returned, not loaders
+    "limit": 100, // Limit is ignored when versionRequired is true
+    "page": 1
+  }
+}
+```
+
+#### **Example Response (Case: `type=forge` with `minecraft_version=1.20.4`)**
+
+```json
+{
+  "success": true,
+  "data": [
+    "49.0.32",
+    "49.0.31",
+    "49.0.30"
+  ],
+  "versionRequired": true,
+  "meta": {
+    "total": 50, // Example: Total number of Forge builds for 1.20.4
+    "limit": 100, // Limit is ignored when versionRequired is true
+    "page": 1
+  }
+}
