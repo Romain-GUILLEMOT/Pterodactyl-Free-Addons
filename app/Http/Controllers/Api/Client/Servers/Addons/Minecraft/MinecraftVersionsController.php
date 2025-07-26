@@ -3,6 +3,7 @@
 namespace Pterodactyl\Http\Controllers\Api\Client\Servers\Addons\Minecraft;
 
 use Illuminate\Http\Request;
+use phpDocumentor\Reflection\PseudoTypes\False_;
 use Pterodactyl\Http\Controllers\Api\Client\ClientApiController;
 use Pterodactyl\Services\Addons\Minecraft\MinecraftVersionsService;
 
@@ -34,9 +35,9 @@ class MinecraftVersionsController extends ClientApiController
         $offset = ($page - 1) * $limit;
         $sortOrder = $request->query('sort', 'asc');
         $minecraftVersion = $request->query('minecraft_version', null);
-        $versionRequired = true;
+        $versionRequired = false;
         if($versionsType === 'forge' || $versionsType === 'neoforge' || $versionsType === 'fabric') {
-            $versionRequired = false;
+            $versionRequired = true;
         }
         $data = $this->minecraftVersionsService->getMinecraftReleases($versionsType, $minecraftVersion);
         if(empty($data)) {
@@ -51,7 +52,7 @@ class MinecraftVersionsController extends ClientApiController
         if($sortOrder === 'desc') {
             $data = array_reverse($data);
         }
-        if($versionRequired) {
+        if(!$versionRequired) {
             $data = array_slice($data, $offset, $limit);
         }
 

@@ -1,32 +1,56 @@
-# Pterodactyl Free & Open Source Modules
+## **Pterodactyl Version Changer Module 🚀**
 
-Welcome to this repository!
+Welcome to the dedicated README for the Pterodactyl Version Changer module!
 
-This is a dedicated space for **free and open-source modules** designed for the [Pterodactyl Panel](https://pterodactyl.io/). My goal is to provide useful, high-quality additions to the Pterodactyl ecosystem for everyone to use and improve.
-
-## Repository Structure
-
-To keep things organized and allow for focused development and easy access, each module will reside on its own dedicated branch:
-
-* **`main` Branch**: This branch serves as the central hub and will primarily contain this README and general repository information. It will **not** contain any module code itself.
-* **Module Branches**: Each module will have its own branch, named descriptively (e.g., `feature/custom-sftp-module`, `fix/auto-backup-manager`). To explore a specific module, simply switch to its respective branch.
-
-## What You Can Expect
-
-* **Free & Open Source**: All modules provided here will be entirely free to use and open-source, released under a permissive license (e.g., MIT, Apache 2.0).
-* **Quality Focused**: Modules will be developed with an emphasis on stability, security, and performance.
-* **Community Driven**: Contributions, bug reports, and feature suggestions are highly welcome!
-
-## How to Use a Module
-
-1.  **Navigate to the Branch**: Browse the branches of this repository and select the module you're interested in.
-2.  **Clone/Download**: Once on the module's branch, you can clone that specific branch or download its contents.
-3.  **Follow Module Instructions**: Each module branch will contain its own `README.md` or dedicated documentation with specific installation and usage instructions.
-
-## Contributions
-
-Feel free to open issues for bug reports, feature requests, or general discussions. If you'd like to contribute code, please fork the repository, make your changes on the relevant module branch (or a new one if it's a brand new feature), and open a pull request.
+This module provides a robust solution for dynamically managing Minecraft server versions directly through the **Pterodactyl Panel's client API**. It integrates seamlessly with Pterodactyl's system by adding new **Eggs and Nests** to facilitate the installation and switching of various Minecraft server types, including Vanilla, Paper, Forge, Fabric, and more.
 
 ---
 
-Thank you for your interest and support!
+### **API Client Usage**
+
+The module exposes a new client API route to fetch available Minecraft versions.
+
+**Endpoint:** `GET /api/client/servers/{server}/addons/minecraft/versions`
+
+#### **Query Parameters**
+
+| Parameter | Type | Default | Description |
+| :-------- | :--- | :------ | :---------- |
+| `page` | `int` | `1` | The result page to retrieve. |
+| `limit` | `int` | `20` | The number of results per page. Max 50. |
+| `search` | `string` | `null` | Filters versions by a search string (e.g., "1.18", "Paper"). |
+| `type` | `string` | `null` | Filters by server type (e.g., "vanilla", "paper", "forge", "fabric"). |
+| `stability` | `string` | `null` | Filters by version stability ("release", "snapshot", "beta", "alpha"). |
+| `build` | `int` | `null` | Filters for a specific build number (e.g., Paper build 200). |
+| `sort` | `string` | `"version"` | The field to sort by ("version", "release\_date", "type"). |
+| `order` | `string` | `"desc"` | The sort order for versions (desc for descending, asc for ascending - default). |
+
+#### **Example Response (Case: `type=paper` with `limit=3`)**
+
+```json
+[
+  {
+    "version": "1.20.4",
+    "type": "paper",
+    "stability": "release",
+    "build": 412,
+    "release_date": "2024-07-25T10:00:00Z",
+    "download_url": "[https://papermc.io/api/v2/projects/paper/versions/1.20.4/builds/412/downloads/paper-1.20.4-412.jar](https://papermc.io/api/v2/projects/paper/versions/1.20.4/builds/412/downloads/paper-1.20.4-412.jar)"
+  },
+  {
+    "version": "1.20.4",
+    "type": "paper",
+    "stability": "release",
+    "build": 411,
+    "release_date": "2024-07-24T18:30:00Z",
+    "download_url": "[https://papermc.io/api/v2/projects/paper/versions/1.20.4/builds/411/downloads/paper-1.20.4-411.jar](https://papermc.io/api/v2/projects/paper/versions/1.20.4/builds/411/downloads/paper-1.20.4-411.jar)"
+  },
+  {
+    "version": "1.20.4",
+    "type": "paper",
+    "stability": "release",
+    "build": 410,
+    "release_date": "2024-07-24T09:15:00Z",
+    "download_url": "[https://papermc.io/api/v2/projects/paper/versions/1.20.4/builds/410/downloads/paper-1.20.4-410.jar](https://papermc.io/api/v2/projects/paper/versions/1.20.4/builds/410/downloads/paper-1.20.4-410.jar)"
+  }
+]
