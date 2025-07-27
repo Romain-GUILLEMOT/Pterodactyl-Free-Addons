@@ -23,6 +23,7 @@ class EggSeeder extends Seeder
         'Source Engine',
         'Voice Servers',
         'Rust',
+        'Minecraft Addons',
     ];
 
     /**
@@ -44,7 +45,7 @@ class EggSeeder extends Seeder
         foreach (static::$import as $nest) {
             /* @noinspection PhpParamsInspection */
             $this->parseEggFiles(
-                Nest::query()->where('author', 'support@pterodactyl.io')->where('name', $nest)->firstOrFail()
+                Nest::query()->whereIn('author', ['support@pterodactyl.io', 'contact@romain-guillemot.dev'])->where('name', $nest)->firstOrFail()
             );
         }
     }

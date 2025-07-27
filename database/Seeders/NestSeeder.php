@@ -44,6 +44,7 @@ class NestSeeder extends Seeder
         $this->createSourceEngineNest(array_get($items, 'Source Engine'));
         $this->createVoiceServersNest(array_get($items, 'Voice Servers'));
         $this->createRustNest(array_get($items, 'Rust'));
+        $this->createMinecraftAddonsNest(array_get($items, 'Minecraft Addons'));
     }
 
     /**
@@ -103,6 +104,21 @@ class NestSeeder extends Seeder
                 'name' => 'Rust',
                 'description' => 'Rust - A game where you must fight to survive.',
             ], 'support@pterodactyl.io');
+        }
+    }
+
+    /**
+     * Create the Minecraft Addons nest to be used later on.
+     *
+     * @throws \Pterodactyl\Exceptions\Model\DataValidationException
+     */
+    private function createMinecraftAddonsNest(array $nest = null)
+    {
+        if (is_null($nest)) {
+            $this->creationService->handle([
+                'name' => 'Minecraft Addons',
+                'description' => 'More minecraft eggs for Pterodactyl.',
+            ], 'contact@romain-guillemot.dev');
         }
     }
 }

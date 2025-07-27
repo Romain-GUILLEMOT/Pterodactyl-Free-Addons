@@ -23,10 +23,8 @@ class MinecraftVersionsService
         switch ($type) {
             // Mojang API
             case "vanilla":
-                return $this->getVanillaRelease(false);
-            case "snapshot":
-                return $this->getVanillaRelease(true);
-
+                return $this->getVanillaRelease();
+                
             // PaperMC API
             case "papermc":
                 return $this->getPaperAPIReleases("paper");
@@ -37,7 +35,7 @@ class MinecraftVersionsService
 
             //Fabric API Structure
             case "fabric":
-                return $this->getFabricReleases();
+                return $this->getFabricReleases($minecraftVersion);
             case "quilt":
                 return $this->getQuiltReleases();
 
@@ -78,7 +76,7 @@ class MinecraftVersionsService
      * @param string $type
      * @return array
      */
-    public function getVanillaRelease(bool $snapshot): array
+    public function getVanillaRelease(): array
     {
         $versionsData = Http::get(
             "https://launchermeta.mojang.com/mc/game/version_manifest.json"
@@ -89,15 +87,7 @@ class MinecraftVersionsService
         $versions = $versionsData->json()["versions"] ?? [];
         $filteredVersions = [];
         foreach ($versions as $version) {
-            if ($version["type"] === "release" && !$snapshot) {
-                $filteredVersions[] = [
-                    "id" => $version["id"],
-                ];
-            } elseif ($version["type"] === "snapshot" && $snapshot) {
-                $filteredVersions[] = [
-                    "id" => $version["id"],
-                ];
-            }
+            $filteredVersions[] = $version["id"];
         }
         return $filteredVersions;
     }
@@ -124,9 +114,7 @@ class MinecraftVersionsService
             $filteredVersions = array_merge(
                 $filteredVersions,
                 array_map(function ($versionId) {
-                    return [
-                        "id" => $versionId,
-                    ];
+                    return $versionId;
                 }, $majorVersion)
             );
         }
@@ -140,36 +128,37 @@ class MinecraftVersionsService
      *
      * @return array
      */
-    public function getFabricReleases(): array
-    {
-        $versionsData = Http::get("https://meta.fabricmc.net/v2/versions/game");
-        if (!$versionsData->successful()) {
-            return [];
-        }
+    public function getFabricReleases(string|null $minecraftVersion): array
+    {   
+                $filteredVersions = [];
 
-        $versions = $versionsData->json() ?? [];
-        $filteredVersions = [];
-        foreach ($versions as $version) {
-            if (isset($version["version"])) {
-                $filteredVersions[] = $version["version"];
+        if(!$minecraftVersion) {
+             $versionsData = Http::get("https://meta.fabricmc.net/v2/versions/game");
+            if (!$versionsData->successful()) {
+                return [];
             }
-        }
 
-        $loaderData = Http::get("https://meta.fabricmc.net/v2/versions/loader");
+            $versions = $versionsData->json() ?? [];
+            foreach ($versions as $version) {
+                if (isset($version["version"])) {
+                    $filteredVersions[] = $version["version"];
+                }
+            }
+        } else {
+$loaderData = Http::get("https://meta.fabricmc.net/v2/versions/loader");
         if (!$loaderData->successful()) {
             return [];
         }
         $loaders = $loaderData->json() ?? [];
-        $filteredLoaders = [];
         foreach ($loaders as $version) {
             if (isset($version["version"])) {
-                $filteredLoaders[] = $version["version"];
+                $filteredVersions[] = $version["version"];
             }
         }
-        return [
-            "game" => array_unique($filteredVersions),
-            "loader" => array_unique($filteredLoaders),
-        ];
+        }
+       
+        
+        return $filteredVersions;
     }
 
     /**
@@ -351,7 +340,7 @@ class MinecraftVersionsService
             return str_starts_with($version, '1.');
         });
         usort($filteredVersions, 'version_compare');
-        return $filteredVersions;
+        return array_reverse($filteredVersions);
     }
 
     // Mohist API
@@ -467,11 +456,9 @@ class MinecraftVersionsService
             if (empty($versionId)) {
                 continue;
             }
-            $filteredVersions[] = [
-                "id" => $versionId,
-            ];
+            $filteredVersions[] = $versionId;
         }
-        return array_reverse($filteredVersions);
+        return $filteredVersions;
     }
 
     /**
@@ -488,9 +475,7 @@ class MinecraftVersionsService
         $versions = $versionsData->json()["versions"] ?? [];
         $filteredVersions = [];
         foreach ($versions as $version) {
-            $filteredVersions[] = [
-                "id" => $version,
-            ];
+            $filteredVersions[] = $version;
         }
         return array_reverse($filteredVersions);
     }

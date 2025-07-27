@@ -145,6 +145,7 @@ Route::group([
     Route::group(['prefix' => '/addons'], function () {
        Route::group(['prefix' => '/minecraft'], function () {
            Route::get('/versions', [Client\Servers\Addons\Minecraft\MinecraftVersionsController::class, 'index']);
+           Route::post('/versions', [Client\Servers\Addons\Minecraft\MinecraftVersionsController::class, 'install']);
        });
     });
 });

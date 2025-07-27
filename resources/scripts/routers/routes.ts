@@ -13,6 +13,7 @@ import AccountApiContainer from '@/components/dashboard/AccountApiContainer';
 import AccountSSHContainer from '@/components/dashboard/ssh/AccountSSHContainer';
 import ActivityLogContainer from '@/components/dashboard/activity/ActivityLogContainer';
 import ServerActivityLogContainer from '@/components/server/ServerActivityLogContainer';
+import MinecraftVersionsContainer from '@/components/server/addons/minecraft/versions/MinecraftVersionsContainer';
 
 // Each of the router files is already code split out appropriately — so
 // all of the items above will only be loaded in when that router is loaded.
@@ -139,6 +140,11 @@ export default {
             permission: 'activity.*',
             name: 'Activity',
             component: ServerActivityLogContainer,
+        },
+        {
+            path: '/addons/minecraft/versions',
+            name: 'Minecraft Versions',
+            component: MinecraftVersionsContainer,
         },
     ],
 } as Routes;
