@@ -10,6 +10,7 @@ use Pterodactyl\Services\Addons\Minecraft\MinecraftVersionsService;
 use Pterodactyl\Models\Server;
 use Pterodactyl\Repositories\Eloquent\ServerVariableRepository;
 use Pterodactyl\Services\Servers\ReinstallServerService;
+use Pterodactyl\Repositories\Wings\DaemonFileRepository;
 use stdClass;
 
 class MinecraftVersionsController extends ClientApiController
@@ -21,12 +22,12 @@ class MinecraftVersionsController extends ClientApiController
     /**
      * MinecraftVersionsController constructor.
      */
-    public function __construct(MinecraftVersionsService $minecraftVersionsService, private ServerVariableRepository $variableRepository, private ReinstallServerService $reinstallServerService) {
+    public function __construct(MinecraftVersionsService $minecraftVersionsService, private ServerVariableRepository $variableRepository, private ReinstallServerService $reinstallServerService, private DaemonFileRepository $fileRepository) {
         parent::__construct();
         $this->minecraftVersionsService = $minecraftVersionsService;
         $this->variableRepository = $variableRepository;
         $this->reinstallServerService = $reinstallServerService;
-        
+        $this->fileRepository = $fileRepository;
     }
     
     /**
@@ -115,10 +116,6 @@ class MinecraftVersionsController extends ClientApiController
     /**
      * Install Minecraft versions based on the type.
      *
-     * TODO: Change java version
-     * TODO: Change STARTUP command
-     * TODO: DELETE OLD server.jar/lib folder
-     * TODO: Use the deleteFiles bool
      * TODO: Create Folia egg
      * TODO: Check MagmaNeo egg
      * TODO: Check Mohist egg
@@ -168,6 +165,7 @@ class MinecraftVersionsController extends ClientApiController
                 'message' => 'Build is required for the selected type (' . $type . ').',
             ];
         }
+        $deleteFiles = $request->json('deleteFiles', false);
         // Get the nessesary egg for the server
 
         $eggData = $this->getEggForType($type);
@@ -179,8 +177,24 @@ class MinecraftVersionsController extends ClientApiController
         }
         $server->egg_id = $eggData->egg_id;
         $server->nest_id = $eggData->nest_id;
+
+        //Docker image
+        $parsedMinecraftVersion = implode('.', array_slice(explode('.', $minecraftVersion), 0, 2));
+
+        $server->image = match (true) {
+            version_compare($parsedMinecraftVersion, '1.20', '>=') => 'ghcr.io/pterodactyl/yolks:java_21',
+            version_compare($parsedMinecraftVersion, '1.17', '>=') => 'ghcr.io/pterodactyl/yolks:java_17',
+            version_compare($parsedMinecraftVersion, '1.16', '>=') => 'ghcr.io/pterodactyl/yolks:java_16', 
+            version_compare($parsedMinecraftVersion, '1.12', '>=') => 'ghcr.io/pterodactyl/yolks:java_11',
+            default => 'ghcr.io/pterodactyl/yolks:java_8',
+        };
+        
+        // Server Startup
+
+        $server->startup = $eggData->startupCommand;
         $server->save();
 
+        // Server Variables
         $serverMcVersion = $server->variables()->where('env_variable', $eggData->minecraftVersion)->first();
         $serverMcBuild = $server->variables()->where('env_variable', $eggData->buildVariable)->first();
         if (!$serverMcVersion || (!$serverMcBuild && $buildRequired)) {
@@ -207,6 +221,18 @@ class MinecraftVersionsController extends ClientApiController
             ]);
         }
 
+        // Delete old server.jar/lib folder
+        $this->fileRepository->setServer($server)->deleteFiles('/', ['server.jar', 'libraries']);
+
+        // Delete old server files if requested
+        if ($deleteFiles) {
+            $files = $this->fileRepository->setServer($server)->getDirectory('/');
+            $filesToDelete = [];
+            foreach ($files as $file) {
+                $filesToDelete[] = $file['name'];
+            }
+            $this->fileRepository->setServer($server)->deleteFiles('/', $filesToDelete);
+        }
         $this->reinstallServerService->handle($server);
 
         return [
@@ -293,6 +319,7 @@ class MinecraftVersionsController extends ClientApiController
                 $eggName = "";
         }
         $egg = Egg::where('name', $eggName)->first();
+
         if (!$egg) {
             return null;
         }
@@ -301,6 +328,7 @@ class MinecraftVersionsController extends ClientApiController
         $responseObject->nest_id = $egg->nest_id;
         $responseObject->minecraftVersion = $versionVariable;
         $responseObject->buildVariable = $buildVariable;
+        $responseObject->startupCommand = $egg->startup;
         return $responseObject;
     
 }

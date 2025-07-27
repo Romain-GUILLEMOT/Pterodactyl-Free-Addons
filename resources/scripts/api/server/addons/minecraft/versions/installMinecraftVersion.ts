@@ -12,7 +12,7 @@ export default async (
         type,
         minecraft_version,
         build,
-        deleteFiles,
+        ...(deleteFiles && { deleteFiles }),
     });
 
     return data;
