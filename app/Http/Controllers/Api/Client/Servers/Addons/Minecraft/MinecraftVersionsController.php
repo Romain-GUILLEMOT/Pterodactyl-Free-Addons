@@ -116,7 +116,6 @@ class MinecraftVersionsController extends ClientApiController
     /**
      * Install Minecraft versions based on the type.
      *
-     * TODO: Create Folia egg
      * TODO: Check MagmaNeo egg
      * TODO: Check Mohist egg
      * TODO: Controller -> Service
@@ -231,7 +230,9 @@ class MinecraftVersionsController extends ClientApiController
             foreach ($files as $file) {
                 $filesToDelete[] = $file['name'];
             }
-            $this->fileRepository->setServer($server)->deleteFiles('/', $filesToDelete);
+            if(!empty($filesToDelete)) {
+                $this->fileRepository->setServer($server)->deleteFiles('/', $filesToDelete);
+            }
         }
         $this->reinstallServerService->handle($server);
 
