@@ -314,7 +314,7 @@ class MinecraftVersionsController extends ClientApiController
             case "magmaneo":
                 $eggName = "Magma";
                 $versionVariable = "MC_VERSION";
-                $buildVariable = "TAG_VERSION";
+                $buildVariable = "MAGMA_VERSION";
                 break;
             default:
                 $eggName = "";
